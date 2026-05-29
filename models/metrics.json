@@ -1,0 +1,8 @@
+{
+  "split": "Test",
+  "accuracy": 0.9524,
+  "roc_auc": 0.7473,
+  "f1": 0.0518,
+  "precision": 0.2955,
+  "recall": 0.0284
+}
