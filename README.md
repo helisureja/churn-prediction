@@ -139,3 +139,149 @@ docker run -p 5000:5000 churn-api
 ## Author
 
 **Heli Sureja** — [linkedin.com/in/helisureja](https://linkedin.com/in/helisureja) · [github.com/helisureja](https://github.com/helisureja)
+
+
+
+
+# Extnded project
+
+## Daily ML Data Pipeline — ETL, Validation & Training Trigger
+
+### Overview
+
+This project extends the existing customer churn prediction system with an automated machine learning data pipeline.
+
+The pipeline ingests daily customer activity CSV files, performs data cleaning and validation, stores processed datasets, and triggers XGBoost model training only when all data quality checks pass.
+
+### Pipeline Architecture
+
+```text
+Daily CSV Files
+       |
+       v
+data/incoming/
+       |
+       v
+ETL Processing (Pandas)
+       |
+       v
+Data Quality Validation
+       |
+       +---- FAIL ----> Save failure report
+       |               Skip model training
+       |
+       +---- PASS ----> Save processed CSV
+                       |
+                       v
+                  Train XGBoost
+                       |
+                       v
+                  Save ML Model
+                       |
+                       v
+                  Archive Input CSV
+```
+
+### Technologies
+
+- Python 3.12
+- Pandas and NumPy
+- XGBoost
+- Scikit-learn
+- Pytest
+- Windows Task Scheduler
+- Git and GitHub
+
+### Data Ingestion
+
+The pipeline scans `data/incoming/` for new CSV files whenever it runs.
+
+Successful inputs are archived in `data/archive/` to avoid reprocessing. Failed inputs remain available for inspection and correction.
+
+Daily execution is configured through Windows Task Scheduler using `run_daily.bat`.
+
+### Data Cleaning and Validation
+
+The pipeline performs:
+
+- Duplicate customer removal
+- Column name normalization
+- Numeric data type conversion
+- Required-column validation
+- Missing-value checks
+- Numeric-range validation
+- Binary-label validation
+- Minimum row-count validation
+- Churn class validation
+
+### Conditional Model Training
+
+If all data quality checks pass, the pipeline saves the processed dataset and triggers XGBoost training.
+
+If any check fails, training is skipped and a JSON report records the validation errors.
+
+### Installation
+
+Create a virtual environment:
+
+```cmd
+python -m venv .venv
+```
+
+Install dependencies:
+
+```cmd
+.venv\Scripts\python -m pip install -r requirements.txt
+```
+
+### Running the Pipeline
+
+Place a CSV file in `data/incoming/`, then run:
+
+```cmd
+.venv\Scripts\python -m src.daily_pipeline
+```
+
+Or run the Windows script:
+
+```cmd
+run_daily.bat
+```
+
+### Automated Tests
+
+Run:
+
+```cmd
+.venv\Scripts\python -m pytest tests -v
+```
+
+Five automated tests cover valid data, invalid charges, missing columns, duplicate removal, and conditional training.
+
+### Output Files
+
+| Location | Description |
+|---|---|
+| `data/processed/` | Validated datasets |
+| `data/archive/` | Successfully processed original CSVs |
+| `models/daily_churn_model.joblib` | Trained XGBoost pipeline |
+| `reports/` | Validation reports and training metrics |
+
+### Results
+
+The pipeline was tested using a synthetic churn dataset.
+
+- Records processed: 39,914
+- Data validation: Passed
+- Training triggered: Yes
+- Accuracy: 95.42%
+- F1-score: 0.0054
+- ROC-AUC: 0.7951
+
+The low F1-score indicates that identifying churn cases remains challenging despite high overall accuracy.
+
+### Limitations
+
+This implementation uses local CSV ingestion and Windows Task Scheduler rather than a cloud-based ingestion service. New CSV files must be supplied to the incoming folder.
+
+The dataset is synthetic, and the current model should not be considered production-ready without further validation and model improvement.

@@ -11,3 +11,23 @@ reports/figures/*.png
 *.egg-info/
 dist/
 build/
+
+# updated project
+# Python environments
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Generated ML artifacts
+*.joblib
+*.pkl
+
+# Generated pipeline data
+data/archive/
+data/processed/
+data/rejected/
+
+# Generated reports
+reports/*.json
